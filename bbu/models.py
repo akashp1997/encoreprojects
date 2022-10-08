@@ -8,10 +8,10 @@ class Project(models.Model):
     description = models.TextField()
     po_date = models.DateField()
     po_spec = models.CharField(max_length=256)
-
     supplier_name = models.CharField(max_length=256)
+
     modified_date = models.DateField(auto_now=True)
-    revision = models.CharField(max_length=256)
+    revision = models.CharField(max_length=32, default="A")
 
     is_validated = models.BooleanField(default=False)
 
