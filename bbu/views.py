@@ -6,7 +6,8 @@ from .models import Project
 
 def index(request):
     """ View to render the projects listing page """
-    return render(request, 'index.html')
+    projects = Project.objects.all()
+    return render(request, 'index.html', {'projects': projects})
 
 
 def create_project(request):
