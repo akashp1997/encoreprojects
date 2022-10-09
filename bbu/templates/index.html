@@ -85,7 +85,7 @@
             title: "PO Code",
             field: "po_code",
             formatter: (cell) => {
-              return `<a class="text-decoration-underline text-danger">${cell.getValue()}</a>`;
+              return `<a class="text-decoration-underline text-danger" href="/project/${cell.getValue()}">${cell.getValue()}</a>`;
             },
             sorter: "number"
           },
@@ -164,7 +164,6 @@
           columnDefaults,
           columns,
           downloadRowRange: "visible",
-          footerElement: "<div class=\"tabulator-footer\"></div>",
           height: "100%",
           initialSort: [
             {column: "name", dir: "asc"}

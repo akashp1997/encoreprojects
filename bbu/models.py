@@ -10,6 +10,7 @@ class Project(models.Model):
     po_spec = models.CharField(max_length=256)
     supplier_name = models.CharField(max_length=256)
 
+    addendum = models.IntegerField(default=0)
     modified_date = models.DateField(auto_now=True)
     revision = models.CharField(max_length=32, default="A")
 
@@ -27,6 +28,8 @@ class BBURow(models.Model):
     uom = models.CharField(max_length=256)
     quantity = models.IntegerField(default=0)
     bbu_value = models.DecimalField(decimal_places=2, max_digits=20)
+
+    forecast_date = models.DateField()
 
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
 

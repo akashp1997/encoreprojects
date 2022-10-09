@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 
 from .forms import ProjectForm
-from .models import Project
+from .models import Project, BBURow
 
 
 def index(request):
@@ -27,3 +27,11 @@ def create_project(request):
         project_form = ProjectForm()
 
     return render(request, 'create-project.html', {'form': project_form})
+
+
+def view_efu(request, po_code):
+    """ View to show the EFU BBU list """
+    project = Project.objects.get(po_code=po_code)
+    bbu_list = BBURow.objects.filter(project_id=po_code).all()
+
+    return render(request, 'bbu-table.html', {'project': project, 'bbu_list': bbu_list})

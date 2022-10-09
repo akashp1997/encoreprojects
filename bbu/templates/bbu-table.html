@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6 class="text-uppercase">EFU Detail</h6>
+                    </div>
+                    <div class="card-description">
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Purchase order</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.po_code }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Creation date</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.po_date|date:"d/m/Y" }}
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Addendum</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.addendum }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Project</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.name }}
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Supplier</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.supplier_name }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Efu submission date/revision</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.modified_date }}
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Technical specification</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.po_spec }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Technical specification description</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.description }}
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="d-flex justify-content-evenly flex-row m-6 table-toolbar">
+                            <div class="card p-2 d-flex flex-row">
+                                <button class="btn btn-outline-success btn-icon mb-0 mx-2">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Export</span>
+                                </button>
+                                <button class="btn btn-outline-success btn-icon mb-0 mx-2">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Filtered Export</span>
+                                </button>
+                                <button class="btn btn-outline-success btn-icon mb-0 mx-2">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Import</span>
+                                </button>
+                            </div>
+                            <div class="card p-2 d-flex flex-row">
+                                <button class="btn btn-outline-secondary btn-icon mb-0">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Add item</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive table-bordered table-striped table-striped-columns m-4" id="bbuTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addItemModel" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addItemModalLabel">Add an item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn bg-gradient-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let data = [
+          {% for bbu_row in bbu_list %}
+            {
+              "po_line_item_no": {{ bbu_row.po_line_item_no }},
+              "po_position_no": {{ bbu_row.po_position_no }},
+              "erection_item": "{{ bbu_row.erection_item }}",
+              "description": "{{ bbu_row.description }}",
+              "supplier_identification_no": "{{ bbu_row.supplier_identification_no }}",
+              "uom": "{{ bbu_row.uom }}",
+              "quantity": {{ bbu_row.quantity }},
+              "bbu_value": {{ bbu_row.bbu_value }}
+            }
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ];
+        let columnDefaults = {
+          hozAlign: "left",
+          vertAlign: "middle",
+          formatter: "plaintext",
+          resizable: true,
+          titleFormatter: (cell) => {
+            cell.getElement().classList.add("text-md","font-weight-bolder")
+            return cell.getValue()
+          },
+          sorter: "string"
+        };
+        let columns = [
+          {
+            title: "PO line item",
+            field: "po_line_item_no"
+          },
+          {
+            title: "PO position",
+            field: "po_position_no"
+          },
+          {
+            title: "Erection item / Kks / Technocode",
+            field: "erection_item"
+          },
+          {
+            title: "Description",
+            field: "description"
+          },
+          {
+            title: "Supplier identification no. / Part list no.",
+            field: "supplier_identification_no"
+          },
+          {
+            title: "UoM",
+            field: "uom"
+          },
+          {
+            title: "Required qty",
+            field: "quantity"
+          },
+          {
+            title: "BBU value",
+            field: "bbu_value"
+          }
+        ];
+        let bbuTable = new Tabulator("#bbuTable", {
+          data,
+          clipboard: "copy",
+          columnDefaults,
+          columns,
+          downloadRowRange: "visible",
+          initialSort: [
+            {column: "po_line_item_no", dir: "asc"},
+            {column: "po_position_no", dir: "asc"}
+          ],
+          layout: "fitColumns",
+          minHeight: 100,
+          persistence: {
+            columns: true,
+            sort: true
+          },
+          persistenceMode: true,
+          placeholder: "No items added",
+          resizableRows: false
+        });
+    </script>
+{% endblock %}

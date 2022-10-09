@@ -10,7 +10,8 @@ class ProjectForm(forms.Form):
             'required': 'Please enter PO #',
             'invalid': 'Please enter a valid PO #',
             'min_value': 'PO # has to be greater than 0'
-        }
+        },
+        widget=forms.TextInput
     )
     name = forms.CharField(
         label='Project Name',
@@ -49,4 +50,50 @@ class ProjectForm(forms.Form):
             'required': 'Please enter the supplier name',
             'max_length': 'The supplier name cannot be longer than 255 characters'
         }
+    )
+
+
+class BBURow(forms.Form):
+    po_line_item_no = forms.IntegerField(
+        label='PO line item no.',
+        min_value=0,
+        error_messages={
+            'required': 'Please enter the PO line item no.',
+            'min_value': 'PO line item no. cannot be less than 0'
+        },
+        widget=forms.TextInput
+    )
+    erection_item = forms.CharField(
+        label='Erection item / KKS / Technocode',
+        max_length=256,
+        error_messages={
+            'required': 'Please enter the erection item info',
+            'min_value': 'PO line item no. cannot be less than 0'
+        },
+        widget=forms.TextInput
+    )
+    forecast_date = forms.DateField(
+        label='Forecast date',
+        required=False
+    )
+    description = forms.CharField(
+        label='Description',
+        error_messages={
+            'required': 'Please enter the item description'
+        },
+        widget=forms.Textarea,
+    )
+    quantity = forms.IntegerField(
+        label='Required qty',
+        initial=1,
+        min_value=1,
+        error_messages={
+            'required': 'Please enter the required quantity',
+            'min_value': 'Required quantity must be greater than 0'
+        },
+        widget=forms.TextInput
+    )
+    supplier_identification_no = forms.CharField(
+        label='Supplier ident. / Part list no. / Part list pos.',
+        required=False
     )
