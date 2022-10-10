@@ -1,5 +1,4 @@
 Django
-django-allauth
 django-s3-sqlite
 django-environ
 zappa

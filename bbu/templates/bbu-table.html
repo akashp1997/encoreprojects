@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if form_load %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+            <span class="alert-text">The row has been added</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    <div class="alert alert-danger alert-dismissible fade" role="alert">
+        <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+        <span class="alert-text"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6 class="text-uppercase">EFU Detail</h6>
+                    </div>
+                    <div class="card-description">
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Purchase order</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.po_code }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Creation date</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.po_date|date:"d/m/Y" }}
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Addendum</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.addendum }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Project</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.name }}
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Supplier</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.supplier_name }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Efu submission date/revision</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.modified_date }}
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-4 col-lg-2 text-end">Technical specification</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.po_spec }}
+                            </dd>
+                            <dt class="col-sm-4 col-lg-2 text-end">Technical specification description</dt>
+                            <dd class="col-sm-4 col-lg-2 text-start">
+                                {{ project.description }}
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="d-flex justify-content-evenly flex-row m-6 table-toolbar">
+                            <div class="card p-2 d-flex flex-row">
+                                <button class="btn btn-outline-success btn-icon mb-0 mx-2 export-xlsx">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Export</span>
+                                </button>
+                                <button class="btn btn-outline-success btn-icon mb-0 mx-2 export-xlsx-selected">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Filtered Export</span>
+                                </button>
+                                <button class="btn btn-outline-success btn-icon mb-0 mx-2" disabled>
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Import</span>
+                                </button>
+                            </div>
+                            <div class="card p-2 d-flex flex-row">
+                                <button type="button" class="btn btn-outline-secondary btn-icon mb-0 mx-2 add-item" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Add item</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-icon mb-0 mx-2 edit-item">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Edit item</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-icon mb-0 mx-2 delete-item" disabled data-bs-toggle="modal" data-bs-target="#deleteItemModal">
+                                    <span class="btn-inner--icon">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </span>
+                                    <span class="btn-inner--text">Delete item</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive table-bordered table-striped table-striped-columns my-4" id="bbuTable"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addItemModalLabel">Add an item</h5>
+                        <button type="reset" class="btn-lg btn-outline-white border-0" data-bs-dismiss="modal" aria-label="Close">
+                            <span class="text-dark text-2xl" aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {% for non_field_error in form.non_field_errors %}
+                            <div class="invalid-feedback">
+                                {{ non_field_error|escape }}
+                            </div>
+                        {% endfor %}
+                        {% for field in form %}
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="{{ field.id_for_label }}" class="form-control-label">{{ field.label }}</label>
+                                        {% if field.widget_type == 'textarea' %}
+                                            <textarea
+                                                    class="form-control {% if field.errors %}is-invalid{% elif field.data %}is-valid{% endif %}"
+                                                    name="{{ field.html_name }}"
+                                                    id="{{ field.id_for_label }}"
+                                                    placeholder="{{ field.help_text }}"
+                                            >{% if field.data %}{{ field.data }}{% else %}{{ field.initial|default_if_none:"" }}{% endif %}</textarea>
+                                        {% else %}
+                                            <input
+                                                    type="{{ field.widget_type }}"
+                                                    class="form-control {% if field.errors %}is-invalid{% elif field.data %}is-valid{% endif %}"
+                                                    name="{{ field.html_name }}"
+                                                    id="{{ field.id_for_label }}"
+                                                    placeholder="{{ field.help_text }}"
+                                                    {% if field.data %}
+                                                        value="{{ field.data }}"
+                                                    {% else %}
+                                                        {% if field.widget_type == 'date' %}
+                                                            value="{% now 'Y-m-d' %}"
+                                                        {% else %}
+                                                            value="{{ field.initial|default_if_none:"" }}"
+                                                        {% endif %}
+                                                    {% endif %}
+                                            />
+                                        {% endif %}
+                                        {% for field_error in field.errors %}
+                                            <div class="invalid-feedback">
+                                                {{ field_error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info bg-gradient-info">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method="post" id="editItemForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editItemLabel">Edit EFU item</h5>
+                        <button type="reset" class="btn-lg btn-outline-white border-0" data-bs-dismiss="modal" aria-label="Close">
+                            <span class="text-dark text-2xl" aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="id" />
+                        <div class="form-group m-0">
+                            <label for="po_code" class="form-control-label">Business purchase order</label>
+                            <input class="form-control" name="po_code" id="po_code" value="{{ project.po_code }}" readonly />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="po_position_no" class="form-control-label">PO position</label>
+                            <input class="form-control" name="po_position_no" id="po_position_no" readonly />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="po_line_item_no" class="form-control-label">PO line item</label>
+                            <input class="form-control" name="po_line_item_no" id="po_line_item_no" readonly />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="erection_item" class="form-control-label">Erection item</label>
+                            <input class="form-control" name="erection_item" id="erection_item" readonly />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="description" class="form-control-label">Description</label>
+                            <textarea class="form-control" name="description" id="description" required></textarea>
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="quantity" class="form-control-label">Quantity</label>
+                            <input type="number" min="1" class="form-control" name="quantity" id="quantity" required />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="uom" class="form-control-label">Unit of measure</label>
+                            <select class="form-select" name="uom" id="uom">
+                                <option value="BAG">BAG - Bag</option>
+                                <option value="BT">BT - BT</option>
+                                <option value="C62">C62 - C62</option>
+                                <option value="DR">DR - DR</option>
+                                <option value="EA">EA - Each</option>
+                                <option value="H">H - Hour</option>
+                                <option value="DAY">DAY - Day</option>
+                                <option value="GLL">GLL - GLL</option>
+                                <option value="GRO">GRO - GRO</option>
+                                <option value="KG">KG - Kilogram</option>
+                                <option value="KM">KM - Kilometer</option>
+                                <option value="HUR">HUR - HUR</option>
+                                <option value="L">L - Liter</option>
+                                <option value="LO">LO - LO</option>
+                                <option value="LT">LT - LT</option>
+                                <option value="LTR">LTR - LTR</option>
+                                <option value="M">M - Meter</option>
+                                <option value="M2">M2 - Square meter</option>
+                                <option value="M3">M3 - Cubic meter</option>
+                                <option value="MLT">MLT - MLT</option>
+                                <option value="MMT">MMT - MMT</option>
+                                <option value="MON">MON - MON</option>
+                                <option value="P" selected="selected">P - P</option>
+                                <option value="SET">SET - SET</option>
+                                <option value="TO">TO - TO</option>
+                                <option value="TON">TON - Ton, short (2000 lb)</option>
+                                <option value="BOX">BOX - Box</option>
+                                <option value="CAR">CAR - Carton</option>
+                                <option value="CP">CP - Hundred</option>
+                                <option value="CS">CS - Case</option>
+                                <option value="DM">DM - Decimeter</option>
+                                <option value="DZ">DZ - Dozen</option>
+                                <option value="FT">FT - Foot</option>
+                                <option value="GAL">GAL - US gallon</option>
+                                <option value="LB">LB - US pound</option>
+                                <option value="LOT">LOT - Lot</option>
+                                <option value="OZ">OZ - Ounce</option>
+                                <option value="PAA">PAA - Pair</option>
+                                <option value="PAC">PAC - Pack</option>
+                                <option value="ROL">ROL - Roll</option>
+                                <option value="YD">YD - Yard</option>
+                            </select>
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="drawing" class="form-control-label">Drawing</label>
+                            <input type="text" class="form-control" name="drawing" id="drawing" />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="supplier_identification_no" class="form-control-label">Supplier Ident. / part list no. / part list pos.</label>
+                            <input type="text" class="form-control" name="supplier_identification_no" id="supplier_identification_no" />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="revision" class="form-control-label">Revision line</label>
+                            <input type="text" class="form-control" name="revision" id="revision" readonly value="A" />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="comment" class="form-control-label">Comment</label>
+                            <input type="text" class="form-control" name="comment" id="comment" />
+                        </div>
+                        <div class="form-group m-0">
+                            <label for="bbu_value" class="form-control-label">Cost</label>
+                            <input type="text" class="form-control" name="bbu_value" id="bbu_value" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn bg-gradient-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" role="dialog" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteItemModalLabel">Are you sure?</h5>
+                    <button type="reset" class="btn-lg btn-outline-white border-0" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="text-dark text-2xl" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the following items?
+                    <ul class="delete-item-list"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn bg-gradient-danger deleteItemButton" data-bs-dismiss="modal">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+      let deleteItems = async (data) => {
+        try {
+          await fetch("{% url 'delete-bbu-rows' project.po_code %}", {
+            method: "DELETE",
+            mode: "cors",
+            cache: "no-cache",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": Cookies.get('csrftoken')
+            },
+            body: JSON.stringify(data)
+          });
+          window.location.reload();
+        } catch (error) {
+          let alertElemText = $(".alert-danger .alert-text");
+          alertElemText.text(error);
+          $(".alert-danger").addClass("show");
+        }
+      };
+      let openEditItemModal = (data) => {
+        const editItemForm = $("#editItemForm");
+        editItemForm.attr("action", `{% url 'edit-item' project.po_code %}`);
+        $.each(Object.entries(data), (_, entry) => {
+          let [key, value] = entry;
+          let inputElem = $(`#${key}`, editItemForm);
+          if (!inputElem) return;
+          if (inputElem.prop("tagName") === "SELECT") {
+            $("option", inputElem).attr("selected", false);
+            if (!value) value = "P"
+            $(`option[value="${value}"]`, inputElem).attr("selected", true);
+          } else if(inputElem.prop("tagName") === "TEXTAREA") {
+            inputElem.text(value);
+          }
+          else {
+            inputElem.val(value);
+          }
+        });
+        $("#editItemModal").modal("show");
+      };
+        let data = [
+          {% for bbu_row in bbu_list %}
+            {
+              "id": {{ bbu_row.id }},
+              "po_line_item_no": {{ bbu_row.po_line_item_no }},
+              "po_position_no": {{ bbu_row.po_position_no }},
+              "erection_item": "{{ bbu_row.erection_item }}",
+              "description": "{{ bbu_row.description }}",
+              "drawing": "{{ bbu_row.drawing }}",
+              "revision": "{{ bbu_row.revision }}",
+              "comment": "{{ bbu_row.comment }}",
+              "supplier_identification_no": "{{ bbu_row.supplier_identification_no }}",
+              "uom": "{{ bbu_row.uom }}",
+              "quantity": {{ bbu_row.quantity }},
+              "bbu_value": {{ bbu_row.bbu_value }}
+            }
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ];
+        let columnDefaults = {
+          hozAlign: "left",
+          vertAlign: "middle",
+          formatter: "plaintext",
+          resizable: true,
+          titleFormatter: (cell) => {
+            cell.getElement().classList.add("text-md","font-weight-bolder")
+            return cell.getValue()
+          },
+          sorter: "string"
+        };
+        let columns = [
+          {
+            title: "Select",
+            formatter:"rowSelection",
+            titleFormatter:"rowSelection",
+            align:"center",
+            headerSort:false,
+            resizable: false,
+            maxWidth: 30
+          },
+          {
+            title: "PO line item",
+            field: "po_line_item_no"
+          },
+          {
+            title: "PO pos.",
+            field: "po_position_no"
+          },
+          {
+            title: "Erection item",
+            field: "erection_item"
+          },
+          {
+            title: "Description",
+            field: "description"
+          },
+          {
+            title: "Supplier id. no.",
+            field: "supplier_identification_no"
+          },
+          {
+            title: "UoM",
+            field: "uom"
+          },
+          {
+            title: "Required qty",
+            field: "quantity"
+          },
+          {
+            title: "BBU value",
+            field: "bbu_value"
+          }
+        ];
+        let bbuTable = new Tabulator("#bbuTable", {
+          data,
+          clipboard: "copy",
+          columnDefaults,
+          columns,
+          downloadRowRange: "visible",
+          initialSort: [
+            {column: "po_line_item_no", dir: "asc"},
+            {column: "po_position_no", dir: "asc"}
+          ],
+          layout: "fitColumns",
+          minHeight: 100,
+          persistence: {
+            sort: true
+          },
+          persistenceMode: true,
+          placeholder: "No items added",
+          resizableRows: false,
+          rowContextMenu: [
+            {
+              label: "Edit item",
+              action: (_, row) => {
+                openEditItemModal(row._row.data);
+              }
+            },
+            {
+              label: "Delete item",
+              action: (_, row) => deleteItems([row._row.data])
+            }
+          ],
+          selectable: true
+        });
+
+        // Load the modal if required
+        {% if form_load %}
+            $("#addItemModal").modal("show");
+        {% endif %}
+
+        $(".export-xlsx").on("click", () => table.download("xlsx", "efu.xlsx", {}, "visible"));
+        $(".export-xlsx-selected").on("click", () => table.download("xlsx", "efu.xlsx", {}, "selected"));
+
+        bbuTable.on("rowSelectionChanged", (data) => {
+          $(".edit-item").prop("disabled", data.length === 0);
+          $(".delete-item").prop("disabled", data.length === 0);
+        });
+
+
+        $(".edit-item").on("click", () => {
+          openEditItemModal(bbuTable.getSelectedData()[0]);
+        });
+        $(".delete-item").on("click", () => {
+          let deleteItemList = $(".delete-item-list");
+          deleteItemList.empty();
+          $.each(bbuTable.getSelectedData(), (index, data) => {
+            deleteItemList.append(`<li class="text-bold">${data.erection_item}</li>`);
+          });
+          $("#deleteItemModal .deleteItemButton").on("click", async () => await deleteItems(bbuTable.getSelectedData()));
+        });
+    </script>
+{% endblock %}
