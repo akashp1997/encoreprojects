@@ -1,0 +1,11 @@
+{
+    "dev": {
+        "aws_region": "ap-south-1",
+        "django_settings": "encoreprojects.settings",
+        "profile_name": "default",
+        "project_name": "encoreprojects",
+        "runtime": "python3.9",
+        "s3_bucket": "encore-bucket",
+        "use_precompiled_packages": false
+    }
+}

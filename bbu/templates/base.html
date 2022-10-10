@@ -61,7 +61,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" style="margin-top: 1rem !important;" aria-labelledby="profileMenuButton">
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="{% url 'logout' %}">
                                             <i class="fa fa-sign-out"></i>
                                             Logout
                                         </a>
@@ -75,9 +75,11 @@
     </nav>
     <!-- End Navbar -->
 {% endblock %}
-{% block content %}
+<main>
+    {% block content %}
 
-{% endblock %}
+    {% endblock %}
+</main>
 {% block footer %}
     <footer class="footer pt-3  ">
         <div class="container-fluid">

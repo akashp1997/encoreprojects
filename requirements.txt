@@ -2,3 +2,5 @@ Django
 django-s3-sqlite
 django-environ
 zappa
+virtualenv
+django-s3-storage
