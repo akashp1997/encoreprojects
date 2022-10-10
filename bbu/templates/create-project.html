@@ -20,37 +20,43 @@
                             <div class="row">
                                 <div class="col-sm-12 col-lg-8 px-6">
                                     <div class="form-group">
-                                        <label for="{{ field.id_for_label }}" class="form-control-label">{{ field.label }}</label>
-                                        {% if field.widget_type == 'textarea' %}
-                                            <textarea
-                                                class="form-control {% if field.errors %}is-invalid{% elif field.data %}is-valid{% endif %}"
-                                                name="{{ field.html_name }}"
-                                                id="{{ field.id_for_label }}"
-                                                placeholder="{{ field.help_text }}"
-                                            >{% if field.data %}{{ field.data }}{% else %}{{ field.initial|default_if_none:"" }}{% endif %}</textarea>
-                                        {% else %}
-                                            <input
-                                                type="{{ field.widget_type }}"
-                                                class="form-control {% if field.errors %}is-invalid{% elif field.data %}is-valid{% endif %}"
-                                                name="{{ field.html_name }}"
-                                                id="{{ field.id_for_label }}"
-                                                placeholder="{{ field.help_text }}"
-                                                {% if field.data %}
-                                                    value="{{ field.data }}"
-                                                {% else %}
-                                                    {% if field.widget_type == 'date' %}
-                                                        value="{% now 'Y-m-d' %}"
+                                        <label for="{{ field.id_for_label }}" class="form-control-label">{{ field.label }} <span class="text-danger">*</span> </label>
+                                        <div class="input-group">
+                                            {% if field.html_name == 'job_no' %}
+                                                <span class="input-group-text">MH-</span>
+                                            {% endif %}
+                                            {% if field.widget_type == 'textarea' %}
+                                                <textarea
+                                                    class="form-control {% if field.errors %}is-invalid{% elif field.data %}is-valid{% endif %}"
+                                                    name="{{ field.html_name }}"
+                                                    id="{{ field.id_for_label }}"
+                                                    placeholder="{{ field.help_text }}"
+                                                >{% if field.data %}{{ field.data }}{% else %}{{ field.initial|default_if_none:"" }}{% endif %}</textarea>
+                                            {% else %}
+                                                <input
+                                                    type="{{ field.widget_type }}"
+                                                    class="form-control {% if field.errors %}is-invalid{% elif field.data %}is-valid{% endif %}"
+                                                    name="{{ field.html_name }}"
+                                                    id="{{ field.id_for_label }}"
+                                                    placeholder="{{ field.help_text }}"
+                                                    {% if field.data %}
+                                                        value="{{ field.data }}"
                                                     {% else %}
-                                                        value="{{ field.initial|default_if_none:"" }}"
+                                                        {% if field.widget_type == 'date' %}
+                                                            value="{% now 'Y-m-d' %}"
+                                                        {% else %}
+                                                            value="{{ field.initial|default_if_none:"" }}"
+                                                        {% endif %}
                                                     {% endif %}
-                                                {% endif %}
-                                            />
-                                        {% endif %}
-                                        {% for field_error in field.errors %}
-                                            <div class="invalid-feedback">
-                                                {{ field_error }}
-                                            </div>
-                                        {% endfor %}
+                                                />
+                                            {% endif %}
+                                            {% for field_error in field.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ field_error }}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

@@ -3,8 +3,18 @@ from django.utils.timezone import now
 
 
 class ProjectForm(forms.Form):
+    job_no = forms.IntegerField(
+        label='Encore Job No',
+        min_value=1,
+        error_messages={
+            'required': 'Please enter job no.',
+            'invalid': 'Please enter a valid job no.',
+            'min_value': 'Job no. has to be greater than 0'
+        },
+        widget=forms.TextInput
+    )
     po_code = forms.IntegerField(
-        label='PO Code',
+        label='PO #',
         min_value=0,
         error_messages={
             'required': 'Please enter PO #',
@@ -22,7 +32,7 @@ class ProjectForm(forms.Form):
         }
     )
     description = forms.CharField(
-        label='Spec description',
+        label='Project Description',
         error_messages={
             'required': 'Please enter the spec description'
         },
@@ -35,16 +45,8 @@ class ProjectForm(forms.Form):
             'required': 'Please enter the PO Date'
         }
     )
-    po_spec = forms.CharField(
-        label='Main PO spec',
-        max_length=256,
-        error_messages={
-            'required': 'Please enter the Main PO Spec',
-            'max_length': 'The main PO spec cannot be longer than 255 characters'
-        }
-    )
     supplier_name = forms.CharField(
-        label='Supplier name',
+        label='Client Name',
         max_length=256,
         error_messages={
             'required': 'Please enter the supplier name',

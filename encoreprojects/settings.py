@@ -18,7 +18,10 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    SECRET_KEY=(str, ''),
+    ALLOWED_HOSTS=(list, ['127.0.0.1']),
+    S3_BUCKET_NAME=(str, '')
 )
 # Take environment variables from .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
@@ -32,10 +35,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'cpj0qi0xo7.execute-api.ap-south-1.amazonaws.com'
-]
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -85,14 +85,21 @@ WSGI_APPLICATION = 'encoreprojects.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django_s3_sqlite",
-        "NAME": "encore.db",
-        "BUCKET": "encore-bucket"
+if env('S3_BUCKET_NAME'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django_s3_sqlite',
+            'NAME': 'encore.db',
+            'BUCKET': env('S3_BUCKET_NAME')
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -128,12 +135,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
-AWS_S3_BUCKET_NAME_STATIC = "encore-bucket"
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_BUCKET_NAME_STATIC}.s3.amazonaws.com'
-
-STATIC_URL = f"https://{AWS_S3_BUCKET_NAME_STATIC}/"
-WHITENOISE_STATIC_PREFIX = '/STATIC'
+if env('S3_BUCKET_NAME'):
+    STATICFILES_STORAGE = 'django_s3_storage.storage.StaticS3Storage'
+    AWS_S3_BUCKET_NAME_STATIC = env('S3_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_BUCKET_NAME_STATIC}.s3.amazonaws.com'
+    STATIC_URL = f'https://{AWS_S3_BUCKET_NAME_STATIC}/'
+    WHITENOISE_STATIC_PREFIX = '/STATIC'
+else:
+    STATIC_URL = '/static/'
 
 
 # Default primary key field type
@@ -141,6 +150,8 @@ WHITENOISE_STATIC_PREFIX = '/STATIC'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/dev/'
-LOGOUT_REDIRECT_URL = '/dev/accounts/login/'
-LOGIN_URL = '/dev/accounts/login'
+# TODO: Remove all prefixes
+if env('S3_BUCKET_NAME'):
+    LOGIN_REDIRECT_URL = '/dev/'
+    LOGOUT_REDIRECT_URL = '/dev/accounts/login/'
+    LOGIN_URL = '/dev/accounts/login/'
