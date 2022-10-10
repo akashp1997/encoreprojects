@@ -28,7 +28,12 @@
     <script src="https://kit.fontawesome.com/fc6bf15ebc.js" crossorigin="anonymous"></script>
     <!-- CSS Files -->
     <link id="pagestyle" href="{% static 'css/argon-dashboard.css' %}" rel="stylesheet" />
-
+    <style>
+        .modal-content {
+            min-width: 50vw;
+            transform: translateX(-12.5vw);
+        }
+    </style>
     {% block stylesheet %}
     {% endblock %}
 </head>

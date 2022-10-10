@@ -44,11 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
@@ -110,15 +106,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-AUTHENTICATION_BACKENDS = [
-    'allauth.account.auth_backends.AuthenticationBackend'
-]
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-
-    }
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
