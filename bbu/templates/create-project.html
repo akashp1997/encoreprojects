@@ -40,7 +40,11 @@
                                                     id="{{ field.id_for_label }}"
                                                     placeholder="{{ field.help_text }}"
                                                     {% if field.data %}
-                                                        value="{{ field.data }}"
+                                                        {% if field.html_name == 'job_no' %}
+                                                            value="{{ field.data|stringformat:"03d" }}"
+                                                        {% else %}
+                                                            value="{{ field.data }}"
+                                                        {% endif %}
                                                     {% else %}
                                                         {% if field.widget_type == 'date' %}
                                                             value="{% now 'Y-m-d' %}"

@@ -40,7 +40,7 @@ def create_project(request):
 
 @login_required
 @require_http_methods(['GET', 'POST'])
-def view_efu(request, po_code):
+def view_efu(request, job_no):
     """ View to show the EFU BBU list """
     form_load = False
     if request.method == 'POST':
@@ -49,16 +49,16 @@ def view_efu(request, po_code):
         if bbu_form.is_valid():
             try:
                 bbu_row = BBURow(**bbu_form.cleaned_data)
-                bbu_row.project_id = po_code
+                bbu_row.project_id = job_no
                 bbu_row.save()
-                return redirect('project-page', po_code)
+                return redirect('project-page', job_no)
             except Exception as exp:
                 bbu_form._errors[NON_FIELD_ERRORS] = bbu_form.error_class([str(exp)])
         form_load = True
     else:
         bbu_form = BBURowForm()
-    project = Project.objects.get(po_code=po_code)
-    bbu_list = BBURow.objects.filter(project_id=po_code).all()
+    project = Project.objects.get(job_no=job_no)
+    bbu_list = BBURow.objects.filter(project_id=job_no).all()
 
     return render(request, 'bbu-table.html', {
         'project': project,
@@ -70,10 +70,10 @@ def view_efu(request, po_code):
 
 @login_required
 @require_http_methods(['POST'])
-def edit_item(request, po_code):
+def edit_item(request, job_no):
     """ View to edit the item by fetching form data """
     bbu_row = BBURow.objects.get(pk=request.POST['id'])
-    if bbu_row.project_id != po_code:
+    if bbu_row.project_id != job_no:
         return HttpResponse(status=400)
 
     bbu_row.description = request.POST['description']
@@ -90,12 +90,12 @@ def edit_item(request, po_code):
     bbu_row.full_clean()
     bbu_row.save()
 
-    return redirect('project-page', po_code)
+    return redirect('project-page', job_no)
 
 
 @login_required
 @require_http_methods(['DELETE'])
-def delete_bbu_row(request, po_code):
+def delete_bbu_row(request, job_no):
     delete_items = json.loads(request.body)
-    BBURow.objects.filter(pk__in=[delete_item['id'] for delete_item in delete_items]).filter(project_id=po_code).delete()
+    BBURow.objects.filter(pk__in=[delete_item['id'] for delete_item in delete_items]).filter(project_id=job_no).delete()
     return HttpResponse(status=200)

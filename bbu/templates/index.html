@@ -56,7 +56,8 @@
         let data = [
           {% for project in projects %}
             {
-              "po_code": {{ project.pk }},
+              "job_no": {{ project.pk }},
+              "po_code": {{ project.po_code }},
               "name": "{{ project.name }}",
               "description": "{{ project.description }}",
               "po_date": "{{ project.po_date|date:"d/m/Y" }}",
@@ -82,11 +83,17 @@
         };
         let columns = [
           {
+            title: "Encore job no",
+            field: "job_no",
+            formatter: (cell) => {
+              return `<a class="text-decoration-underline text-info" href="/project/MH-${cell.getValue()}">MH-${cell.getValue()}</a>`;
+            },
+            sorter: "number"
+          },
+          {
             title: "PO Code",
             field: "po_code",
-            formatter: (cell) => {
-              return `<a class="text-decoration-underline text-danger" href="/project/${cell.getValue()}">${cell.getValue()}</a>`;
-            },
+            formatter: "text",
             sorter: "number"
           },
           {
