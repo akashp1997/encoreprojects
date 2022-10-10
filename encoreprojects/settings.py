@@ -32,7 +32,10 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'cpj0qi0xo7.execute-api.ap-south-1.amazonaws.com'
+]
 
 
 # Application definition
@@ -44,7 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'django_s3_storage',
+    'django_s3_sqlite'
 ]
 
 MIDDLEWARE = [
@@ -82,9 +87,10 @@ WSGI_APPLICATION = 'encoreprojects.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django_s3_sqlite",
+        "NAME": "encore.db",
+        "BUCKET": "encore-bucket"
     }
 }
 
@@ -122,14 +128,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
-if DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
+AWS_S3_BUCKET_NAME_STATIC = "encore-bucket"
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_BUCKET_NAME_STATIC}.s3.amazonaws.com'
+
+STATIC_URL = f"https://{AWS_S3_BUCKET_NAME_STATIC}/"
+WHITENOISE_STATIC_PREFIX = '/STATIC'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dev/'
+LOGOUT_REDIRECT_URL = '/dev/accounts/login/'
+LOGIN_URL = '/dev/accounts/login'
