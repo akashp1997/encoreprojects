@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.forms.forms import NON_FIELD_ERRORS
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -9,6 +10,7 @@ from .forms import ProjectForm, BBURowForm
 from .models import Project, BBURow
 
 
+@login_required
 @require_http_methods(['GET'])
 def index(request):
     """ View to render the projects listing page """
@@ -16,6 +18,7 @@ def index(request):
     return render(request, 'index.html', {'projects': projects})
 
 
+@login_required
 @require_http_methods(['GET', 'POST'])
 def create_project(request):
     """ View to render the create project form """
@@ -35,6 +38,7 @@ def create_project(request):
     return render(request, 'create-project.html', {'form': project_form})
 
 
+@login_required
 @require_http_methods(['GET', 'POST'])
 def view_efu(request, po_code):
     """ View to show the EFU BBU list """
@@ -64,6 +68,7 @@ def view_efu(request, po_code):
     })
 
 
+@login_required
 @require_http_methods(['POST'])
 def edit_item(request, po_code):
     """ View to edit the item by fetching form data """
@@ -88,6 +93,7 @@ def edit_item(request, po_code):
     return redirect('project-page', po_code)
 
 
+@login_required
 @require_http_methods(['DELETE'])
 def delete_bbu_row(request, po_code):
     delete_items = json.loads(request.body)
