@@ -24,12 +24,12 @@ class BBURow(models.Model):
 
     erection_item = models.CharField(max_length=256)
     description = models.TextField()
-    supplier_identification_no = models.TextField()
+    supplier_identification_no = models.TextField(null=True)
     uom = models.CharField(max_length=256)
     quantity = models.IntegerField(default=0)
-    bbu_value = models.DecimalField(decimal_places=2, max_digits=20)
+    bbu_value = models.DecimalField(decimal_places=2, max_digits=20, default=0)
 
-    forecast_date = models.DateField()
+    forecast_date = models.DateField(null=True)
 
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
 

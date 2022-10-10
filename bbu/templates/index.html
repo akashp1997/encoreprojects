@@ -211,10 +211,16 @@
               $(elem).addClass("disabled");
             }
           });
+          table.on("rowDblClick", (event, row) => {
+            $(row._row.cells[0].element).children("a")[0].click();
+          });
+          table.on("rowTap", (event, row) => {
+            $(row._row.cells[0].element).children("a")[0].click();
+          });
 
           // Export hook
-          $(".export-xlsx").on("click", () => table.download("xlsx", "efu.xlsx"));
-          $(".export-pdf").on("click", () => table.download("pdf", "efu.pdf"));
+          $(".export-xlsx").on("click", () => table.download("xlsx", "efu.xlsx", {}, "visible"));
+          $(".export-pdf").on("click", () => table.download("pdf", "efu.pdf", {}, "visible"));
         });
     </script>
 {% endblock %}

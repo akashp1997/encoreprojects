@@ -53,13 +53,22 @@ class ProjectForm(forms.Form):
     )
 
 
-class BBURow(forms.Form):
+class BBURowForm(forms.Form):
     po_line_item_no = forms.IntegerField(
         label='PO line item no.',
         min_value=0,
         error_messages={
             'required': 'Please enter the PO line item no.',
             'min_value': 'PO line item no. cannot be less than 0'
+        },
+        widget=forms.TextInput
+    )
+    po_position_no = forms.IntegerField(
+        label='PO position no.',
+        min_value=0,
+        error_messages={
+            'required': 'Please enter the PO position no.',
+            'min_value': 'PO position no. cannot be less than 0'
         },
         widget=forms.TextInput
     )

@@ -20,5 +20,6 @@ from . import views
 urlpatterns = [
     path('', views.index, name='homepage'),
     path('create-project', views.create_project, name='create-project'),
-    path('project/<int:po_code>', views.view_efu, name='project-page')
+    path('project/<int:po_code>', views.view_efu, name='project-page'),
+    path('project/<int:po_code>/delete-items', views.delete_bbu_row, name='delete-bbu-rows')
 ]
