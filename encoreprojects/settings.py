@@ -18,10 +18,12 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False),
-    SECRET_KEY=(str, ''),
-    ALLOWED_HOSTS=(list, ['127.0.0.1']),
-    S3_BUCKET_NAME=(str, '')
+    DEBUG=(bool, True),
+    SECRET_KEY=(str, 'ABCD'),
+    ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost']),
+    S3_BUCKET_NAME=(str, 'encore-bucket'),
+    URL_PREFIX=(str, ''),
+    SENTRY_DSN=(str, '')
 )
 # Take environment variables from .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
@@ -36,6 +38,26 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+URL_PREFIX = env('URL_PREFIX')
+
+if env('SENTRY_DSN'):
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    sentry_sdk.init(
+        dsn=env('SENTRY_DSN'),
+        integrations=[
+            DjangoIntegration(),
+        ],
+
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=1.0,
+
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True
+    )
 
 
 # Application definition
@@ -49,7 +71,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_s3_storage',
-    'django_s3_sqlite'
+    'django_s3_sqlite',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -60,6 +83,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'encoreprojects.urls'
@@ -150,8 +174,12 @@ else:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# TODO: Remove all prefixes
 if env('S3_BUCKET_NAME'):
-    LOGIN_REDIRECT_URL = '/dev/'
-    LOGOUT_REDIRECT_URL = '/dev/accounts/login/'
-    LOGIN_URL = '/dev/accounts/login/'
+    LOGIN_REDIRECT_URL = f'{URL_PREFIX}/'
+    LOGOUT_REDIRECT_URL = f'{URL_PREFIX}/accounts/login/'
+    LOGIN_URL = f'{URL_PREFIX}/accounts/login/'
+
+
+# https://dzone.com/articles/how-to-fix-django-cors-error
+ALLOWED_HOSTS=['*']
+CORS_ORIGIN_ALLOW_ALL = True

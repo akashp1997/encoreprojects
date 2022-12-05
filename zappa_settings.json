@@ -6,6 +6,10 @@
         "project_name": "encoreprojects",
         "runtime": "python3.9",
         "s3_bucket": "encore-bucket",
-        "use_precompiled_packages": false
+        "use_precompiled_packages": false,
+        "environment_variables": {
+            "SENTRY_DSN": "https://8a3540efed3e49bcb04526b244201a56@o4504213280849920.ingest.sentry.io/4504213282488320"
+        },
+        "exception_handler": "zappa_sentry.unhandled_exceptions"
     }
 }

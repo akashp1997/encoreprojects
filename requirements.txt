@@ -4,3 +4,5 @@ django-environ
 zappa
 virtualenv
 django-s3-storage
+sentry_sdk
+zappa_sentry

@@ -1,8 +1,9 @@
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.core import serializers
 from django.forms.forms import NON_FIELD_ERRORS
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 
@@ -99,3 +100,7 @@ def delete_bbu_row(request, job_no):
     delete_items = json.loads(request.body)
     BBURow.objects.filter(pk__in=[delete_item['id'] for delete_item in delete_items]).filter(project_id=job_no).delete()
     return HttpResponse(status=200)
+
+def get_projects_api(request):
+    projects = json.loads(serializers.serialize('json', Project.objects.all()))
+    return JsonResponse({'projects': projects})
