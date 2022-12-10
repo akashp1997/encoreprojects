@@ -21,7 +21,7 @@ env = environ.Env(
     DEBUG=(bool, True),
     SECRET_KEY=(str, 'ABCD'),
     ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost']),
-    S3_BUCKET_NAME=(str, 'encore-bucket'),
+    S3_BUCKET_NAME=(str, ''),
     URL_PREFIX=(str, ''),
     SENTRY_DSN=(str, '')
 )
@@ -72,14 +72,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_s3_storage',
     'django_s3_sqlite',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -148,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
+DATE_FORMAT = '%d/%m/%Y'
 TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
@@ -181,5 +183,17 @@ if env('S3_BUCKET_NAME'):
 
 
 # https://dzone.com/articles/how-to-fix-django-cors-error
-ALLOWED_HOSTS=['*']
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOWED_ORIGINS=['*']
+CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication'
+    ]
+}

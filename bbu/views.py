@@ -1,14 +1,21 @@
 import json
+import dateutil.parser
 
 from django.contrib.auth.decorators import login_required
-from django.core import serializers
+# from django.core import serializers
 from django.forms.forms import NON_FIELD_ERRORS
+from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .forms import ProjectForm, BBURowForm
 from .models import Project, BBURow
+from .serializers import ProjectSerializer, BbuItemSerializer
 
 
 @login_required
@@ -101,6 +108,24 @@ def delete_bbu_row(request, job_no):
     BBURow.objects.filter(pk__in=[delete_item['id'] for delete_item in delete_items]).filter(project_id=job_no).delete()
     return HttpResponse(status=200)
 
-def get_projects_api(request):
-    projects = json.loads(serializers.serialize('json', Project.objects.all()))
-    return JsonResponse({'projects': projects})
+
+class ProjectsViewSet(viewsets.ModelViewSet):
+    """ View set for projects model """
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+    @action(detail=True, methods=['get'])
+    def efu(self, request, pk=None):
+        """ List all BBU items for a project """
+        project = self.get_object()
+
+        bbu_list_db = BBURow.objects.filter(project_id=project.job_no).all()
+        bbu_list = BbuItemSerializer(data=bbu_list_db, many=True)
+        bbu_list.is_valid()
+
+        return Response(bbu_list.data)
+
+class BbuViewSet(viewsets.ModelViewSet):
+    """ View set for BBU entries model """
+    queryset = BBURow.objects.all()
+    serializer_class = BbuItemSerializer
