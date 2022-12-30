@@ -15,14 +15,15 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib import admin
 from django.urls import path, include
 
-from . import views
+from knox.views import LogoutView, LogoutAllView
+
+from .views import LoginView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/login/', views.login, name='login'),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('', include('bbu.urls')),
+    path('auth/login/', LoginView.as_view(), name='know_login'),
+    path('auth/logout/', LogoutView.as_view(), name='know_logout'),
+    path('auth/logoutall/', LogoutAllView.as_view(), name='know_logoutall'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

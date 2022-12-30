@@ -125,6 +125,25 @@ class ProjectsViewSet(viewsets.ModelViewSet):
 
         return Response(bbu_list.data)
 
+    @efu.mapping.post
+    def import_efu(self, request, pk=None):
+        """ Import multiple BBU items for a project """
+        project = self.get_object()
+        bbu_list = BbuItemSerializer(data=request.data, many=True)
+        bbu_list.is_valid(raise_exception=True)
+
+        bbu_list.save()
+        return HttpResponse(status=200)
+
+    @efu.mapping.delete
+    def delete_efu(self, request, pk=None):
+        """ Import multiple BBU items for a project """
+        project = self.get_object()
+        print(request.data)
+        BBURow.objects.filter(project=project.job_no).filter(id__in=request.data).delete()
+        return HttpResponse(status=200)
+
+
 class BbuViewSet(viewsets.ModelViewSet):
     """ View set for BBU entries model """
     queryset = BBURow.objects.all()

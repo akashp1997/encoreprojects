@@ -26,19 +26,33 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class BbuItemSerializer(serializers.ModelSerializer):
     """ Define the API representation for bbu items """
+    po_line_item_no = serializers.IntegerField()
+    po_position_no = serializers.IntegerField()
+
+    erection_item = serializers.CharField(max_length=256)
+    description = serializers.CharField()
+
+    drawing = serializers.CharField(required=False, default="", allow_null=True)
+    supplier_identification_no = serializers.CharField(required=False, allow_null=True)
+    revision = serializers.CharField(max_length=32, default="A", required=False, allow_null=True)
+    comment = serializers.CharField(max_length=256, required=False, default="", allow_null=True)
+
+    quantity = serializers.IntegerField(required=False, default=0, allow_null=True)
+    uom = serializers.CharField(max_length=256, required=False, default="P", allow_null=True)
+    bbu_value = serializers.DecimalField(decimal_places=2, max_digits=20, default=0, required=False, allow_null=True)
+
+    forecast_date = serializers.DateField()
     class Meta:
         """ Metaclass definition for serializer """
         model = BBURow
         fields = '__all__'
         read_only_fields = ['creation_timestamp', 'modified_timestamp']
 
+    def create(self, validated_data):
+        return super().create(validated_data)
+
     def update(self, bbu_row, validated_data):
         """ Update the BBU entry """
-        bbu_row.description = validated_data.get('description', bbu_row.description)
-        bbu_row.drawing = validated_data.get('drawing', bbu_row.drawing)
-        bbu_row.quantity = validated_data.get('quantity', bbu_row.quantity)
-        bbu_row.uom = validated_data.get('uom', bbu_row.uom)
-        bbu_row.supplier_identification_No = validated_data.get('supplier_identification_No', bbu_row.supplier_identification_No)
-        bbu_row.revision = validated_data.get('revision', bbu_row.revision)
-        bbu_row.comment = validated_data.get('comment', bbu_row.comment)
-        bbu_row.bbu_value = validated_data.get('bbu_value', bbu_row.bbu_value)
+        validated_data['drawing'] = validated_data.get('drawing', '')
+        validated_data['comment'] = validated_data.get('comment', '')
+        return super().update(bbu_row, validated_data)

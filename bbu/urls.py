@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework import routers
-from rest_framework.authtoken.views import obtain_auth_token
 
 from . import views
 
@@ -31,5 +30,4 @@ urlpatterns = [
     path('project/MH-<int:job_no>/delete-items', views.delete_bbu_row, name='delete-bbu-rows'),
     path('project/MH-<int:job_no>/edit-item', views.edit_item, name='edit-item'),
     path('api/', include(router.urls)),
-    path('api/auth', obtain_auth_token, name='api_auth')
 ]
