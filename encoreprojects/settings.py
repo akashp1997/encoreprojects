@@ -12,13 +12,19 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 import pathlib
 import environ
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    DEBUG=(bool, True),
+    SECRET_KEY=(str, 'ABCD'),
+    ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost']),
+    S3_BUCKET_NAME=(str, ''),
+    URL_PREFIX=(str, ''),
+    SENTRY_DSN=(str, '')
 )
 # Take environment variables from .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
@@ -32,10 +38,27 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'cpj0qi0xo7.execute-api.ap-south-1.amazonaws.com'
-]
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+URL_PREFIX = env('URL_PREFIX')
+
+if env('SENTRY_DSN'):
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    sentry_sdk.init(
+        dsn=env('SENTRY_DSN'),
+        integrations=[
+            DjangoIntegration(),
+        ],
+
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=1.0,
+
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True
+    )
 
 
 # Application definition
@@ -49,17 +72,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_s3_storage',
-    'django_s3_sqlite'
+    'django_s3_sqlite',
+    'corsheaders',
+    'rest_framework',
+    'knox'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'encoreprojects.urls'
@@ -85,14 +112,21 @@ WSGI_APPLICATION = 'encoreprojects.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django_s3_sqlite",
-        "NAME": "encore.db",
-        "BUCKET": "encore-bucket"
+if env('S3_BUCKET_NAME'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django_s3_sqlite',
+            'NAME': 'encore.db',
+            'BUCKET': env('S3_BUCKET_NAME')
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -117,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
+DATE_FORMAT = '%d/%m/%Y'
 TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
@@ -128,12 +162,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
-AWS_S3_BUCKET_NAME_STATIC = "encore-bucket"
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_BUCKET_NAME_STATIC}.s3.amazonaws.com'
-
-STATIC_URL = f"https://{AWS_S3_BUCKET_NAME_STATIC}/"
-WHITENOISE_STATIC_PREFIX = '/STATIC'
+if env('S3_BUCKET_NAME'):
+    STATICFILES_STORAGE = 'django_s3_storage.storage.StaticS3Storage'
+    AWS_S3_BUCKET_NAME_STATIC = env('S3_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_BUCKET_NAME_STATIC}.s3.amazonaws.com'
+    STATIC_URL = f'https://{AWS_S3_BUCKET_NAME_STATIC}/'
+    WHITENOISE_STATIC_PREFIX = '/STATIC'
+else:
+    STATIC_URL = '/static/'
 
 
 # Default primary key field type
@@ -141,6 +177,31 @@ WHITENOISE_STATIC_PREFIX = '/STATIC'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/dev/'
-LOGOUT_REDIRECT_URL = '/dev/accounts/login/'
-LOGIN_URL = '/dev/accounts/login'
+if env('S3_BUCKET_NAME'):
+    LOGIN_REDIRECT_URL = f'{URL_PREFIX}/'
+    LOGOUT_REDIRECT_URL = f'{URL_PREFIX}/accounts/login/'
+    LOGIN_URL = f'{URL_PREFIX}/accounts/login/'
+
+
+# https://dzone.com/articles/how-to-fix-django-cors-error
+# CORS_ALLOWED_ORIGINS=['*']
+CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'knox.auth.TokenAuthentication'
+    ]
+}
+
+REST_KNOX = {
+  'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+  'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+  'USER_SERIALIZER': 'encoreprojects.serializers.UserSerializer',
+  'TOKEN_TTL': datetime.timedelta(hours=7 * 24),
+  'AUTO_REFRESH': True
+}

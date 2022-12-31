@@ -6,6 +6,7 @@
         "project_name": "encoreprojects",
         "runtime": "python3.9",
         "s3_bucket": "encore-bucket",
-        "use_precompiled_packages": false
+        "use_precompiled_packages": false,
+        "exception_handler": "zappa_sentry.unhandled_exceptions"
     }
 }

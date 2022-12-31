@@ -3,11 +3,11 @@ from django.db import models
 
 class Project(models.Model):
     """ Model to represent any project """
-    po_code = models.BigAutoField(primary_key=True)
+    job_no = models.AutoField(primary_key=True)
+    po_code = models.IntegerField()
     name = models.CharField(max_length=256)
     description = models.TextField()
     po_date = models.DateField()
-    po_spec = models.CharField(max_length=256)
     supplier_name = models.CharField(max_length=256)
 
     addendum = models.IntegerField(default=0)
