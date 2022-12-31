@@ -14,3 +14,4 @@ pygments
 django-filter
 django-guardian
 djangorestframework
+django-rest-knox
