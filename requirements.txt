@@ -6,3 +6,12 @@ virtualenv
 django-s3-storage
 sentry_sdk
 zappa_sentry
+django-cors-headers
+pyyaml
+uritemplate
+markdown
+pygments
+django-filter
+django-guardian
+djangorestframework
+django-rest-knox
